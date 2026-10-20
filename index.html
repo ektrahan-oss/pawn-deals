@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no, address=no, date=no">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pawn Deals">
+<meta name="theme-color" content="#143a30">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Pawn Deals</title>
+<style>
+  :root {
+    --bg: #f4f2ec; --card: #ffffff; --ink: #1d2320; --muted: #66706b; --line: #e2ded3;
+    --brand: #143a30; --brand-ink: #f4f2ec; --gold: #b8892a; --ok: #1f7a4d; --warn: #a3610b; --chip: #ebe7dc;
+    --tap: #143a30;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1513; --card: #18201d; --ink: #edf0ee; --muted: #9aa5a0; --line: #2a3430; --brand: #143a30; --brand-ink: #f4f2ec; --gold: #e2b75a; --ok: #5cc28d; --warn: #e5a347; --chip: #222c28; --tap: #e2b75a; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
+  a { color: inherit; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--brand); color: var(--brand-ink); padding: calc(env(safe-area-inset-top, 0px) + 10px) max(14px, env(safe-area-inset-right)) 10px max(14px, env(safe-area-inset-left)); }
+  header h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: .2px; }
+  header .meta { font-size: 13px; opacity: .85; margin-top: 2px; }
+  .bar { display: flex; gap: 8px; overflow-x: auto; padding: 10px max(14px, env(safe-area-inset-left)) 4px; scrollbar-width: none; }
+  .bar::-webkit-scrollbar { display: none; }
+  .chip { flex: 0 0 auto; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 14px; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 4px max(14px, env(safe-area-inset-left)) 8px; font-size: 14px; color: var(--muted); }
+  .toggles label { display: inline-flex; align-items: center; gap: 6px; }
+  .toggles input { width: 18px; height: 18px; }
+  main { padding: 0 max(12px, env(safe-area-inset-left)) calc(env(safe-area-inset-bottom, 0px) + 40px); max-width: 680px; margin: 0 auto; }
+  .area { margin-top: 18px; }
+  .area h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .area h2 a { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--tap); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .store { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+  .store-head { padding: 12px 14px 10px; display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; border-bottom: 1px solid var(--line); }
+  .store-head .nm { font-weight: 700; }
+  .store-head .ad { font-size: 13px; color: var(--muted); }
+  .store-head .cnt { font-size: 12px; font-weight: 600; color: var(--gold); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+  .deal { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .deal:last-child { border-bottom: 0; }
+  .deal.done { opacity: .45; }
+  .deal .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .deal .item { font-weight: 650; }
+  .deal .item a { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+  .deal .profit { font-weight: 800; color: var(--ok); white-space: nowrap; }
+  .deal .line2 { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 13px; }
+  .pill { padding: 2px 9px; border-radius: 999px; background: var(--chip); color: var(--ink); font-weight: 600; }
+  .pill.fast { color: var(--ok); } .pill.long { color: var(--muted); } .pill.check { color: var(--warn); } .pill.new { background: var(--gold); color: #1b1300; }
+  .deal .why, .deal .chk { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .deal .chk b { color: var(--ink); }
+  .ca { margin-top: 8px; background: var(--chip); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
+  .ca .sw { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ca .sw strong { font-size: 16px; }
+  .ca .small { color: var(--muted); font-size: 13px; margin-top: 4px; word-break: break-word; }
+  .actions { display: flex; gap: 8px; margin-top: 10px; }
+  .actions .btn { flex: 1; }
+  .actions .btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .empty, .err { text-align: center; color: var(--muted); padding: 40px 10px; }
+  .note { font-size: 13px; color: var(--muted); margin: 18px 4px 0; }
+  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .over { color: var(--warn); font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pawn Deals</h1>
+  <div class="meta" id="meta">Loading today's list…</div>
+</header>
+<div class="bar" id="cats" role="group" aria-label="Category">
+  <button class="chip" data-cat="" aria-pressed="true">All flips</button>
+  <button class="chip" data-cat="Gold" aria-pressed="false">Gold</button>
+  <button class="chip" data-cat="Tool" aria-pressed="false">Tools</button>
+  <button class="chip" data-cat="Watch" aria-pressed="false">Watches</button>
+  <button class="chip" data-cat="Bag" aria-pressed="false">Bags</button>
+  <button class="chip" data-cat="Other" aria-pressed="false">Other</button>
+  <button class="chip" data-cat="Firearm" aria-pressed="false">Firearms</button>
+</div>
+<div class="toggles">
+  <label><input type="checkbox" id="t-long"> Hide long shots</label>
+  <label><input type="checkbox" id="t-done" checked> Hide bought/skipped</label>
+  <label><input type="checkbox" id="t-budget"> Under $500</label>
+</div>
+<main id="list"><div class="empty">Loading…</div></main>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var state = { cat: '', long: false, done: true, budget: false };
+  var SPEED = { Fast: 0, Medium: 1, Slow: 2, Hold: 3 };
+  var SW = [1, 0.7, 0.4, 0.3];
+  var deals = [], stores = {}, scan = {};
+  var marks = {};
+  try { marks = JSON.parse(localStorage.getItem('pawnMarks') || '{}'); } catch (e) { marks = {}; }
+  try { var s = JSON.parse(localStorage.getItem('pawnFilters') || 'null'); if (s) state = Object.assign(state, s); } catch (e) {}
+
+  function save() {
+    try { localStorage.setItem('pawnMarks', JSON.stringify(marks)); localStorage.setItem('pawnFilters', JSON.stringify(state)); } catch (e) {}
+  }
+  function money(v) { v = Number(v); return '$' + v.toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function key(d) { return d.chain === 'Cash America' ? 'CA' + d.item_no : (d.link || d.item); }
+  function itemNo(n) { return String(n || '').replace(/(\d{3})(?=\d)/g, '$1‌'); }
+  function toast(t) { var x = document.getElementById('toast'); x.textContent = t; x.classList.add('show'); setTimeout(function () { x.classList.remove('show'); }, 1600); }
+  function byPriority(a, b) { return (SPEED[a.flip_speed] - SPEED[b.flip_speed]) || (b.priority_score - a.priority_score); }
+  function mapUrl(s) {
+    if (!s) return '';
+    if (s.map_url) return s.map_url;
+    if (s.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
+    return '';
+  }
+  function stop(s) { return s.address ? s.address : (s.lat + ',' + s.lon); }
+
+  function copy(text) {
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, 99999);
+      try { document.execCommand('copy'); toast('Copied "' + text + '"'); } catch (e) { toast('Search for: ' + text); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast('Copied "' + text + '". Paste it in the Cash America app'); }, fallback);
+    } else fallback();
+  }
+
+  function dealCard(d) {
+    var k = key(d), m = marks[k] || '';
+    var c = el('div', 'deal' + (m ? ' done' : ''));
+    var top = el('div', 'top');
+    var it = el('div', 'item');
+    if (d.chain === 'EZPawn' && d.link) { var a = el('a', null, d.item); a.href = d.link; a.target = '_blank'; a.rel = 'noopener'; it.appendChild(a); }
+    else it.textContent = d.item;
+    top.appendChild(it);
+    var pr = el('div', 'profit', (d.category === 'Firearm' ? 'save ' : '+') + money(d.est_profit));
+    top.appendChild(pr);
+    c.appendChild(top);
+
+    var l2 = el('div', 'line2');
+    l2.appendChild(el('span', 'pill', money(d.price)));
+    if (Number(d.price) > 500) l2.appendChild(el('span', 'over', 'over $500'));
+    var sp = el('span', 'pill ' + (d.flip_speed === 'Fast' ? 'fast' : ''), d.category === 'Firearm' ? 'Keep' : (d.flip_speed + ' flip'));
+    l2.appendChild(sp);
+    var cf = el('span', 'pill ' + (d.confidence === 'Long shot' ? 'long' : d.confidence === 'Check in person' ? 'check' : ''), d.confidence);
+    l2.appendChild(cf);
+    if (d.new) l2.appendChild(el('span', 'pill new', 'NEW'));
+    c.appendChild(l2);
+
+    if (d.category === 'Firearm') c.appendChild(el('div', 'why', 'Going used about ' + money(d.resale_low) + (d.resale_high && d.resale_high !== d.resale_low ? '–' + money(d.resale_high) : '') + '. ' + (d.why || '')));
+    else if (d.why) c.appendChild(el('div', 'why', d.why));
+    var chk = el('div', 'chk'); chk.appendChild(el('b', null, 'Check: ')); chk.appendChild(document.createTextNode(d.check_first || '')); c.appendChild(chk);
+
+    if (d.chain === 'Cash America') {
+      var ca = el('div', 'ca');
+      if (d.search_word) {
+        var sw = el('div', 'sw');
+        var lab = el('div'); lab.appendChild(document.createTextNode('Search in app: ')); lab.appendChild(el('strong', null, d.search_word));
+        sw.appendChild(lab);
+        var b = el('button', 'btn primary', 'Copy'); b.type = 'button';
+        b.addEventListener('click', function () { copy(d.search_word); });
+        sw.appendChild(b);
+        ca.appendChild(sw);
+        if (d.search_count && d.search_count > 10) ca.appendChild(el('div', 'small', 'Then look for ' + money(d.price) + ' at store ' + d.store_key.replace('CA-', '#')));
+      }
+      ca.appendChild(el('div', 'small', 'Counter item # ' + itemNo(d.item_no)));
+      ca.appendChild(el('div', 'small', 'Listed as: ' + (d.listed_as || '')));
+      c.appendChild(ca);
+    }
+
+    var act = el('div', 'actions');
+    [['bought', 'Bought'], ['skip', 'Skip']].forEach(function (p) {
+      var bt = el('button', 'btn', p[1]); bt.type = 'button'; bt.setAttribute('aria-pressed', m === p[0] ? 'true' : 'false');
+      bt.addEventListener('click', function () { if (marks[k] === p[0]) delete marks[k]; else marks[k] = p[0]; save(); draw(); });
+      act.appendChild(bt);
+    });
+    c.appendChild(act);
+    return c;
+  }
+
+  function draw() {
+    var list = document.getElementById('list'); list.textContent = '';
+    var rows = deals.filter(function (d) {
+      if (state.cat === '' && d.category === 'Firearm') return false;
+      if (state.cat && d.category !== state.cat) return false;
+      if (state.long && d.confidence === 'Long shot') return false;
+      if (state.done && marks[key(d)]) return false;
+      if (state.budget && Number(d.price) > 500) return false;
+      return true;
+    });
+    if (!rows.length) { list.appendChild(el('div', 'empty', state.cat === 'Firearm' ? 'No firearms below their going used price today.' : 'No deals match these filters.')); return; }
+
+    var areas = {};
+    rows.forEach(function (d) { var a = d.region || 'Other area'; (areas[a] = areas[a] || {}); (areas[a][d.store_key] = areas[a][d.store_key] || []).push(d); });
+    var score = function (a) { var t = 0; Object.keys(areas[a]).forEach(function (s) { areas[a][s].forEach(function (d) { t += d.priority_score * SW[SPEED[d.flip_speed] || 0]; }); }); return t; };
+    Object.keys(areas).sort(function (a, b) { return score(b) - score(a); }).forEach(function (a) {
+      var sec = el('section', 'area');
+      var h = el('h2'); h.appendChild(el('span', null, a));
+      var sKeys = Object.keys(areas[a]).sort(function (x, y) { return byPriority(areas[a][x].slice().sort(byPriority)[0], areas[a][y].slice().sort(byPriority)[0]); });
+      var stops = sKeys.map(function (k) { return stores[k]; }).filter(function (s) { return s && (s.address || s.lat != null); });
+      if (stops.length > 1) { var r = el('a', null, 'Route ›'); r.href = 'https://www.google.com/maps/dir/' + stops.map(function (s) { return encodeURIComponent(stop(s)); }).join('/'); r.target = '_blank'; r.rel = 'noopener'; h.appendChild(r); }
+      sec.appendChild(h);
+      sKeys.forEach(function (k) {
+        var s = stores[k] || {}; var items = areas[a][k].slice().sort(byPriority);
+        var card = el('div', 'store');
+        var hd = el('div', 'store-head');
+        var info = el('div');
+        info.appendChild(el('div', 'nm', s.name || k));
+        info.appendChild(el('div', 'ad', s.address || s.near || ''));
+        if (items.length > 1) info.appendChild(el('div', 'cnt', items.length + ' deals here'));
+        hd.appendChild(info);
+        var mu = mapUrl(s);
+        if (mu) { var mb = el('a', 'btn', 'Map'); mb.href = mu; mb.target = '_blank'; mb.rel = 'noopener'; hd.appendChild(mb); }
+        card.appendChild(hd);
+        items.forEach(function (d) { card.appendChild(dealCard(d)); });
+        sec.appendChild(card);
+      });
+      list.appendChild(sec);
+    });
+    list.appendChild(el('p', 'note', 'Flip profit = low resale estimate minus selling fees and the price plus sales tax. Gold uses 85% of melt. Firearms show savings against the going used price. Have gold weighed and check items in person before buying. Bought and Skip marks are saved on this phone only.'));
+  }
+
+  function setChips() {
+    document.querySelectorAll('#cats .chip').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-cat') === state.cat ? 'true' : 'false'); });
+    document.getElementById('t-long').checked = state.long;
+    document.getElementById('t-done').checked = state.done;
+    document.getElementById('t-budget').checked = state.budget;
+  }
+  document.querySelectorAll('#cats .chip').forEach(function (b) { b.addEventListener('click', function () { state.cat = b.getAttribute('data-cat'); setChips(); save(); draw(); window.scrollTo(0, 0); }); });
+  document.getElementById('t-long').addEventListener('change', function (e) { state.long = e.target.checked; save(); draw(); });
+  document.getElementById('t-done').addEventListener('change', function (e) { state.done = e.target.checked; save(); draw(); });
+  document.getElementById('t-budget').addEventListener('change', function (e) { state.budget = e.target.checked; save(); draw(); });
+  setChips();
+
+  var bust = '?t=' + Date.now();
+  Promise.all([
+    fetch('deals.json' + bust).then(function (r) { return r.json(); }),
+    fetch('stores.json' + bust).then(function (r) { return r.json(); }),
+    fetch('scan.json' + bust).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
+  ]).then(function (res) {
+    deals = res[0]; res[1].forEach(function (s) { stores[s.store_key] = s; });
+    (res[2] || []).forEach(function (r) { scan[r.metric] = r.value; });
+    var meta = deals.filter(function (d) { return d.category !== 'Firearm'; }).length + ' flips';
+    var fa = deals.filter(function (d) { return d.category === 'Firearm'; }).length; if (fa) meta += ', ' + fa + ' firearms';
+    if (scan['Gold price used ($/oz)']) meta += ' · Gold ' + money(Math.round(scan['Gold price used ($/oz)'])) + '/oz';
+    var upd = scan['Updated'] ? ' · ' + scan['Updated'] : '';
+    document.getElementById('meta').textContent = meta + upd;
+    draw();
+  }).catch(function () {
+    document.getElementById('list').innerHTML = '';
+    document.getElementById('list').appendChild(el('div', 'err', "Couldn't load today's list. Check your connection and pull down to refresh."));
+    document.getElementById('meta').textContent = 'Offline';
+  });
+})();
+</script>
+</body>
+</html>

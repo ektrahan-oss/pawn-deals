@@ -1,0 +1,42 @@
+[
+ {
+  "metric": "EZPawn items scanned",
+  "value": 58575,
+  "note": "All Houston-area EZPawn online inventory"
+ },
+ {
+  "metric": "Cash America items in range",
+  "value": 95216,
+  "note": "Within 50 miles of downtown"
+ },
+ {
+  "metric": "Cash America items checked",
+  "value": 61320,
+  "note": "Jewelry, watches, bags, tools, music, cameras"
+ },
+ {
+  "metric": "Gold pieces priced vs. melt",
+  "value": 24387,
+  "note": "Pieces with weight and karat listed"
+ },
+ {
+  "metric": "Gold listed below melt",
+  "value": 40,
+  "note": "Price under scrap value at today's spot"
+ },
+ {
+  "metric": "Deals flagged",
+  "value": 51,
+  "note": "Estimated profit of $75 or more"
+ },
+ {
+  "metric": "Gold price used ($/oz)",
+  "value": 4138.22,
+  "note": "Spot price from metalcharts.org, Oct 20 2026 (evening re-run)"
+ },
+ {
+  "metric": "Updated",
+  "value": "Updated Mon 7:15 pm",
+  "note": "Last scan time, Houston time"
+ }
+]
