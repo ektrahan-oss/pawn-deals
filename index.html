@@ -70,6 +70,10 @@
   .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
   .over { color: var(--warn); font-size: 12px; font-weight: 600; }
+  .nearbar { display: flex; align-items: center; gap: 10px; padding: 0 max(14px, env(safe-area-inset-left)) 6px; }
+  .nearbar .btn[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+  .nearbar .msg { font-size: 13px; color: var(--muted); }
+  .dist { font-size: 13px; font-weight: 700; color: var(--tap); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -91,6 +95,10 @@
   <label><input type="checkbox" id="t-done" checked> Hide bought/skipped</label>
   <label><input type="checkbox" id="t-budget"> Under $500</label>
 </div>
+<div class="nearbar">
+  <button class="btn" type="button" id="near" aria-pressed="false">📍 Deals near me</button>
+  <span class="msg" id="near-msg"></span>
+</div>
 <main id="list"><div class="empty">Loading…</div></main>
 <div class="toast" id="toast"></div>
 
@@ -100,6 +108,13 @@
   var SPEED = { Fast: 0, Medium: 1, Slow: 2, Hold: 3 };
   var SW = [1, 0.7, 0.4, 0.3];
   var deals = [], stores = {}, scan = {};
+  var here = null;
+  function miles(a, b, c, d) {
+    var R = 3958.8, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
+    var h = Math.sin(x / 2) * Math.sin(x / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) * Math.sin(y / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function distTo(k) { var s = stores[k]; return (here && s && s.lat != null) ? miles(here.lat, here.lon, s.lat, s.lon) : 9999; }
   var marks = {};
   try { marks = JSON.parse(localStorage.getItem('pawnMarks') || '{}'); } catch (e) { marks = {}; }
   try { var s = JSON.parse(localStorage.getItem('pawnFilters') || 'null'); if (s) state = Object.assign(state, s); } catch (e) {}
@@ -198,6 +213,7 @@
     });
     if (!rows.length) { list.appendChild(el('div', 'empty', state.cat === 'Firearm' ? 'No firearms below their going used price today.' : 'No deals match these filters.')); return; }
 
+    if (here) { drawNear(list, rows); return; }
     var areas = {};
     rows.forEach(function (d) { var a = d.region || 'Other area'; (areas[a] = areas[a] || {}); (areas[a][d.store_key] = areas[a][d.store_key] || []).push(d); });
     var score = function (a) { var t = 0; Object.keys(areas[a]).forEach(function (s) { areas[a][s].forEach(function (d) { t += d.priority_score * SW[SPEED[d.flip_speed] || 0]; }); }); return t; };
@@ -208,25 +224,60 @@
       var stops = sKeys.map(function (k) { return stores[k]; }).filter(function (s) { return s && (s.address || s.lat != null); });
       if (stops.length > 1) { var r = el('a', null, 'Route ›'); r.href = 'https://www.google.com/maps/dir/' + stops.map(function (s) { return encodeURIComponent(stop(s)); }).join('/'); r.target = '_blank'; r.rel = 'noopener'; h.appendChild(r); }
       sec.appendChild(h);
-      sKeys.forEach(function (k) {
-        var s = stores[k] || {}; var items = areas[a][k].slice().sort(byPriority);
-        var card = el('div', 'store');
-        var hd = el('div', 'store-head');
-        var info = el('div');
-        info.appendChild(el('div', 'nm', s.name || k));
-        info.appendChild(el('div', 'ad', s.address || s.near || ''));
-        if (items.length > 1) info.appendChild(el('div', 'cnt', items.length + ' deals here'));
-        hd.appendChild(info);
-        var mu = mapUrl(s);
-        if (mu) { var mb = el('a', 'btn', 'Map'); mb.href = mu; mb.target = '_blank'; mb.rel = 'noopener'; hd.appendChild(mb); }
-        card.appendChild(hd);
-        items.forEach(function (d) { card.appendChild(dealCard(d)); });
-        sec.appendChild(card);
-      });
+      sKeys.forEach(function (k) { sec.appendChild(storeCard(k, areas[a][k].slice().sort(byPriority))); });
       list.appendChild(sec);
     });
     list.appendChild(el('p', 'note', 'Flip profit = low resale estimate minus selling fees and the price plus sales tax. Gold uses 85% of melt. Firearms show savings against the going used price. Have gold weighed and check items in person before buying. Bought and Skip marks are saved on this phone only.'));
   }
+
+  function storeCard(k, items) {
+    var s = stores[k] || {};
+    var card = el('div', 'store');
+    var hd = el('div', 'store-head');
+    var info = el('div');
+    info.appendChild(el('div', 'nm', s.name || k));
+    info.appendChild(el('div', 'ad', s.address || s.near || ''));
+    if (here && distTo(k) < 9999) info.appendChild(el('div', 'dist', distTo(k).toFixed(1) + ' mi from you'));
+    if (items.length > 1) info.appendChild(el('div', 'cnt', items.length + ' deals here'));
+    hd.appendChild(info);
+    if (here && s.lat != null) {
+      var db = el('a', 'btn', 'Go'); db.href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(stop(s)); db.target = '_blank'; db.rel = 'noopener'; hd.appendChild(db);
+    } else {
+      var mu = mapUrl(s);
+      if (mu) { var mb = el('a', 'btn', 'Map'); mb.href = mu; mb.target = '_blank'; mb.rel = 'noopener'; hd.appendChild(mb); }
+    }
+    card.appendChild(hd);
+    items.forEach(function (d) { card.appendChild(dealCard(d)); });
+    return card;
+  }
+  function drawNear(list, rows) {
+    var by = {};
+    rows.forEach(function (d) { (by[d.store_key] = by[d.store_key] || []).push(d); });
+    var keys = Object.keys(by).sort(function (a, b) { return distTo(a) - distTo(b); });
+    var groups = [['Within 10 miles', 0, 10], ['10 to 25 miles', 10, 25], ['Farther out', 25, 1e9]];
+    groups.forEach(function (g) {
+      var ks = keys.filter(function (k) { var m = distTo(k); return m >= g[1] && m < g[2]; });
+      if (!ks.length) return;
+      var sec = el('section', 'area'); var h = el('h2'); h.appendChild(el('span', null, g[0])); sec.appendChild(h);
+      ks.forEach(function (k) { sec.appendChild(storeCard(k, by[k].slice().sort(byPriority))); });
+      list.appendChild(sec);
+    });
+    list.appendChild(el('p', 'note', 'Sorted by straight-line distance from where you are now. Tap Go for directions. Your location stays on this phone.'));
+  }
+  function setNear(on) {
+    var b = document.getElementById('near'), msg = document.getElementById('near-msg');
+    if (!on) { here = null; b.setAttribute('aria-pressed', 'false'); msg.textContent = ''; draw(); return; }
+    if (!navigator.geolocation) { msg.textContent = 'Location is not available on this phone.'; return; }
+    msg.textContent = 'Finding you…';
+    navigator.geolocation.getCurrentPosition(function (p) {
+      here = { lat: p.coords.latitude, lon: p.coords.longitude };
+      b.setAttribute('aria-pressed', 'true'); msg.textContent = 'Closest stores first. Tap again to go back.';
+      draw(); window.scrollTo(0, 0);
+    }, function (e) {
+      msg.textContent = e.code === 1 ? 'Location is off for this app. Turn it on in Settings > Privacy > Location Services > Safari Websites.' : 'Could not find your location. Try again.';
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
+  }
+  document.getElementById('near').addEventListener('click', function () { setNear(!here); });
 
   function setChips() {
     document.querySelectorAll('#cats .chip').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-cat') === state.cat ? 'true' : 'false'); });
