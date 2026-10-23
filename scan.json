@@ -1,42 +1,42 @@
 [
  {
   "metric": "EZPawn items scanned",
-  "value": 59682,
+  "value": 59111,
   "note": ""
  },
  {
   "metric": "Cash America items in range",
-  "value": 96590,
+  "value": 96753,
   "note": ""
  },
  {
   "metric": "Cash America items checked",
-  "value": 66519,
+  "value": 66633,
   "note": ""
  },
  {
   "metric": "Gold pieces priced vs. melt",
-  "value": 24201,
+  "value": 24104,
   "note": ""
  },
  {
   "metric": "Gold listed below melt",
-  "value": 45,
-  "note": ""
- },
- {
-  "metric": "Deals flagged",
   "value": 44,
   "note": ""
  },
  {
+  "metric": "Deals flagged",
+  "value": 24,
+  "note": ""
+ },
+ {
   "metric": "Gold price used ($/oz)",
-  "value": 4055.48,
+  "value": 4023.17,
   "note": ""
  },
  {
   "metric": "Updated",
-  "value": "Updated Thu 10:58 am",
+  "value": "Updated Fri 5:33 am",
   "note": "Last scan time, Houston time"
  }
 ]
