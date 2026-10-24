@@ -25,7 +25,7 @@ KNIFE = re.compile(r"benchmade|spyderco|chris reeve|\bcrk\b|microtech|zero toler
 GUN = re.compile(r"colt|smith ?& ?wesson|\bs&w\b|smith wesson|sig ?sauer|\bsig\b|heckler|\bhk\b|h&k|kimber|springfield|ruger|winchester|browning|beretta|walther|\bcz\b|glock|marlin|remington|henry|savage|tikka|sako|benelli|fn\b|fnh|weatherby|wilson combat|nighthawk|korth|manurhin|steyr|daniel defense|\bknight|lwrc|staccato|\bsti\b|dan wesson|les baer|ithaca|mossberg|python|anaconda|luger|mauser|garand|m1 carbine|high power|hi-?power", re.I)
 OPTIC = re.compile(r"leupold|vortex|nightforce|trijicon|aimpoint|eotech|swarovski|zeiss|schmidt|kahles|holosun|sig ?sauer|\bsig\b|burris|steiner|primary arms|pulsar|\bagm\b|\batn\b|thermal|night ?vision|\bpvs|\bacog|\brmr\b|razor|viper|romeo|tango|kilo", re.I)
 GEAR_NAME = re.compile(r"scope|sight|optic|night vision|thermal|range ?finder|gun accessory|red dot|magnifier|binocular", re.I)
-NFA = re.compile(r"suppressor|silencer", re.I)
+SUPP = re.compile(r"suppressor|silencer|silencerco|surefire|dead air|rugged|\byhm\b|yankee hill|thunder beast|huxwrx|banish|\bcgs\b|griffin armament|\bq llc\b|otter creek|\bhux\b", re.I)
 JBRAND = re.compile(r"tiffany|\bt ?& ?co\b|cartier|yurman|van cleef|\bvca\b|alhambra|bvlgari|bulgari|john hardy|roberto coin|mikimoto|buccellati|messika|pomellato|chopard|herm[eè]s", re.I)
 KARAT = re.compile(r"\b(10|14|18|22|24)\s?K", re.I)
 
@@ -151,8 +151,8 @@ def main():
             bags.append(dict(base, kind="luggage") if re.search(r"luggage|suitcase|carry-?on|keepall|horizon|pegase|duffel", text, re.I) else base)
         elif "Tools" in parent and TOOL.search(text) and price <= TOOL_MAX:
             tools.append(base)
-        elif ("Sporting" in parent or "Optics" in parent) and OPTIC.search(text) and GEAR_NAME.search(text) and 40 <= price <= 1500:
-            gear.append(base)
+        elif ("Sporting" in parent or "Optics" in parent) and ((OPTIC.search(text) and GEAR_NAME.search(text)) or SUPP.search(text)) and 40 <= price <= 2000:
+            gear.append(dict(base, kind="suppressor") if SUPP.search(text) else base)
         elif OTHER.search(text) and 40 <= price <= 600 and not any(x in parent for x in ("Jewelry", "Watches", "Clothing", "Tools")):
             other.append(base)
     for r in ca:
@@ -186,9 +186,9 @@ def main():
             other.append(dict(base, kind="knife"))
         elif r["_cat"] == "4000" and re.search(r"rifle|shotgun|pistol|revolver|handgun", name, re.I) and GUN.search(d) and price <= 5000:
             guns.append(base)
-        elif r["_cat"] == "4000" and not re.search(r"rifle|shotgun|pistol|revolver|handgun", name, re.I) and not NFA.search(name + " " + d) \
-                and OPTIC.search(d) and 40 <= price <= 1500:
-            gear.append(base)
+        elif r["_cat"] == "4000" and not re.search(r"rifle|shotgun|pistol|revolver|handgun", name, re.I) \
+                and (OPTIC.search(d) or SUPP.search(name + " " + d)) and 40 <= price <= 2000:
+            gear.append(dict(base, kind="suppressor") if SUPP.search(name + " " + d) else base)
 
     gold.sort(key=lambda x: x["ratio"])
     for lst in (branded, watches, bags, tools, other, guns, gear):
