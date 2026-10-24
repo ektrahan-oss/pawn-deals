@@ -83,17 +83,17 @@
 </header>
 <div class="bar" id="cats" role="group" aria-label="Category">
   <button class="chip" data-cat="" aria-pressed="true">All flips</button>
-  <button class="chip" data-cat="Gold" aria-pressed="false">Gold</button>
+  <button class="chip" data-cat="Gold" aria-pressed="false">Gold &amp; jewelry</button>
   <button class="chip" data-cat="Tool" aria-pressed="false">Tools</button>
   <button class="chip" data-cat="Watch" aria-pressed="false">Watches</button>
-  <button class="chip" data-cat="Bag" aria-pressed="false">Bags</button>
+  <button class="chip" data-cat="Bag" aria-pressed="false">Bags &amp; luggage</button>
   <button class="chip" data-cat="Other" aria-pressed="false">Other</button>
-  <button class="chip" data-cat="Firearm" aria-pressed="false">Firearms</button>
+  <button class="chip" data-cat="Firearm" aria-pressed="false">Firearms &amp; gear</button>
 </div>
 <div class="toggles">
   <label><input type="checkbox" id="t-long"> Hide long shots</label>
   <label><input type="checkbox" id="t-done" checked> Hide bought/skipped</label>
-  <label><input type="checkbox" id="t-budget"> Under $500</label>
+  <label><input type="checkbox" id="t-budget"> In budget</label>
 </div>
 <div class="nearbar">
   <button class="btn" type="button" id="near" aria-pressed="false">📍 Deals near me</button>
@@ -108,6 +108,8 @@
   var SPEED = { Fast: 0, Medium: 1, Slow: 2, Hold: 3 };
   var SW = [1, 0.7, 0.4, 0.3];
   var deals = [], stores = {}, scan = {};
+  var GROUP = { Gold: ['Gold', 'Jewelry'], Firearm: ['Firearm', 'Gun gear'] };
+  function inBudget(d) { return d.in_budget ? d.in_budget === 'Yes' : Number(d.price) <= (d.category === 'Tool' ? 1000 : 500); }
   var here = null;
   function miles(a, b, c, d) {
     var R = 3958.8, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
@@ -162,7 +164,7 @@
 
     var l2 = el('div', 'line2');
     l2.appendChild(el('span', 'pill', money(d.price)));
-    if (Number(d.price) > 500) l2.appendChild(el('span', 'over', 'over $500'));
+    if (d.category !== 'Firearm' && !inBudget(d)) l2.appendChild(el('span', 'over', 'over budget'));
     var sp = el('span', 'pill ' + (d.flip_speed === 'Fast' ? 'fast' : ''), d.category === 'Firearm' ? 'Keep' : (d.flip_speed + ' flip'));
     l2.appendChild(sp);
     var cf = el('span', 'pill ' + (d.confidence === 'Long shot' ? 'long' : d.confidence === 'Check in person' ? 'check' : ''), d.confidence);
@@ -205,10 +207,10 @@
     var list = document.getElementById('list'); list.textContent = '';
     var rows = deals.filter(function (d) {
       if (state.cat === '' && d.category === 'Firearm') return false;
-      if (state.cat && d.category !== state.cat) return false;
+      if (state.cat && !(GROUP[state.cat] || [state.cat]).includes(d.category)) return false;
       if (state.long && d.confidence === 'Long shot') return false;
       if (state.done && marks[key(d)]) return false;
-      if (state.budget && Number(d.price) > 500) return false;
+      if (state.budget && !inBudget(d)) return false;
       return true;
     });
     if (!rows.length) { list.appendChild(el('div', 'empty', state.cat === 'Firearm' ? 'No firearms below their going used price today.' : 'No deals match these filters.')); return; }
