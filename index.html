@@ -83,7 +83,7 @@
 </header>
 <div class="bar" id="cats" role="group" aria-label="Category">
   <button class="chip" data-cat="" aria-pressed="true">All flips</button>
-  <button class="chip" data-cat="Gold" aria-pressed="false">Gold &amp; jewelry</button>
+  <button class="chip" data-cat="Gold" aria-pressed="false">Gold, silver &amp; jewelry</button>
   <button class="chip" data-cat="Tool" aria-pressed="false">Tools</button>
   <button class="chip" data-cat="Watch" aria-pressed="false">Watches</button>
   <button class="chip" data-cat="Bag" aria-pressed="false">Bags &amp; luggage</button>
@@ -108,7 +108,7 @@
   var SPEED = { Fast: 0, Medium: 1, Slow: 2, Hold: 3 };
   var SW = [1, 0.7, 0.4, 0.3];
   var deals = [], stores = {}, scan = {};
-  var GROUP = { Gold: ['Gold', 'Jewelry'], Firearm: ['Firearm', 'Gun gear'] };
+  var GROUP = { Gold: ['Gold', 'Silver', 'Jewelry'], Firearm: ['Firearm', 'Gun gear'] };
   function inBudget(d) { return d.in_budget ? d.in_budget === 'Yes' : Number(d.price) <= (d.category === 'Tool' ? 1000 : 500); }
   var here = null;
   function miles(a, b, c, d) {

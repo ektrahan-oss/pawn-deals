@@ -27,6 +27,10 @@ OPTIC = re.compile(r"leupold|vortex|nightforce|trijicon|aimpoint|eotech|swarovsk
 GEAR_NAME = re.compile(r"scope|sight|optic|night vision|thermal|range ?finder|gun accessory|red dot|magnifier|binocular", re.I)
 SUPP = re.compile(r"suppressor|silencer|silencerco|surefire|dead air|rugged|\byhm\b|yankee hill|thunder beast|huxwrx|banish|\bcgs\b|griffin armament|\bq llc\b|otter creek|\bhux\b", re.I)
 JBRAND = re.compile(r"tiffany|\bt ?& ?co\b|cartier|yurman|van cleef|\bvca\b|alhambra|bvlgari|bulgari|john hardy|roberto coin|mikimoto|buccellati|messika|pomellato|chopard|herm[eè]s", re.I)
+POWER = re.compile(r"\bhonda\b.*(generator|\beu\d|\beb\d|\bem\d|\beg\d)|(generator|\beu\d{4}).*\bhonda\b|\bstihl\b|husqvarna", re.I)
+SCANNER = re.compile(r"autel|maxisys|maxicom|maxiim|x-?431|topdon|snap[- ]?on.*(zeus|solus|verus|triton|modis|apollo)|matco.*maximus", re.I)
+BOW = re.compile(r"mathews|\bhoyt\b|bowtech|elite archery|\bprime\b|\bpse\b|ravin|tenpoint|excalibur", re.I)
+AUDIO = re.compile(r"pioneer ?dj|\bcdj|\bdjm|\bxdj|ddj-?(1000|flx10|rev7|sx3)|\brane\b|denon ?dj|\bprime ?4|sm7b|\bksm\d|\bbeta ?(58|87|91)|neumann|md ?421|\bmkh ?(416|50|8040)\b|\bc ?414|universal audio|\bapollo|ulxd|axient|\bslxd", re.I)
 KARAT = re.compile(r"\b(10|14|18|22|24)\s?K", re.I)
 
 
@@ -90,9 +94,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stores", required=True)
     ap.add_argument("--gold", type=float, required=True)
+    ap.add_argument("--silver", type=float, default=0)
     ap.add_argument("--out", default=".")
     a = ap.parse_args()
     gpg = a.gold / 31.1035
+    spg = a.silver / 31.1035
     stores = {s["store_key"]: s for s in json.load(open(a.stores))}
 
     def store_info(key):
@@ -115,7 +121,7 @@ def main():
     except Exception:
         ca_total = len(ca)
 
-    gold, branded, watches, bags, tools, other, guns, gear = [], [], [], [], [], [], [], []
+    gold, silver, branded, watches, bags, tools, other, guns, gear = [], [], [], [], [], [], [], [], []
     gold_checked = 0
     for p in ez:
         tags = p.get("tags", [])
@@ -145,12 +151,20 @@ def main():
                 melt = w * pur * gpg
                 if price / melt < 1.1:
                     gold.append(dict(base, grams=w, purity=pur, melt=round(melt), ratio=round(price / melt, 2)))
+            elif spg and "silver" in (mat + p["title"]).lower() and w and (pur in (0.925, 0.999) or "sterling" in (mat + p["title"]).lower()):
+                melt = w * (pur or 0.925) * spg
+                if melt >= 40 and price / melt < 0.9:
+                    silver.append(dict(base, grams=w, purity=pur or 0.925, melt=round(melt), ratio=round(price / melt, 2)))
         elif "Watches" in parent and WATCH.search(text) and price <= 1500:
             watches.append(base)
         elif "Clothing" in parent and (BAG.search(text) or LUGGAGE.search(text)) and price <= 600:
             bags.append(dict(base, kind="luggage") if re.search(r"luggage|suitcase|carry-?on|keepall|horizon|pegase|duffel", text, re.I) else base)
-        elif "Tools" in parent and TOOL.search(text) and price <= TOOL_MAX:
-            tools.append(base)
+        elif ("Tools" in parent or "Automotive" in parent) and (TOOL.search(text) or SCANNER.search(text) or POWER.search(text)) and 40 <= price <= TOOL_MAX:
+            tools.append(dict(base, kind="power") if POWER.search(text) else dict(base, kind="scanner") if SCANNER.search(text) else base)
+        elif "Sporting" in parent and BOW.search(text) and re.search(r"\bbow\b|compound|crossbow", text, re.I) and 100 <= price <= 1000:
+            other.append(dict(base, kind="bow"))
+        elif ("Musical" in parent or "Electronics" in parent) and AUDIO.search(text) and 60 <= price <= 1500:
+            other.append(dict(base, kind="audio"))
         elif ("Sporting" in parent or "Optics" in parent) and ((OPTIC.search(text) and GEAR_NAME.search(text)) or SUPP.search(text)) and 40 <= price <= 2000:
             gear.append(dict(base, kind="suppressor") if SUPP.search(text) else base)
         elif OTHER.search(text) and 40 <= price <= 600 and not any(x in parent for x in ("Jewelry", "Watches", "Clothing", "Tools")):
@@ -167,7 +181,11 @@ def main():
         km, wm = KARAT.search(d), re.search(r"([\d.]+)\s*(GRM|GRAMS?|GR)\b", d, re.I)
         if r["_cat"] == "1000" and JBRAND.search(d) and not re.search(r"\bwatch", name, re.I) and 40 <= price <= 1500:
             branded.append(base)
-        if r["_cat"] == "1000" and km and wm and not re.search(r"\bwatch", name, re.I):
+        if r["_cat"] == "1000" and spg and wm and not km and re.search(r"\bsterling\b|\b925\b", d, re.I) and not re.search(r"\bwatch", name, re.I):
+            w = float(wm.group(1)); melt = w * 0.925 * spg
+            if melt >= 40 and price / melt < 0.9:
+                silver.append(dict(base, grams=w, purity=0.925, melt=round(melt), ratio=round(price / melt, 2)))
+        elif r["_cat"] == "1000" and km and wm and not re.search(r"\bwatch", name, re.I):
             w = float(wm.group(1)); pur = int(km.group(1)) / 24
             if w > 0:
                 gold_checked += 1
@@ -178,12 +196,17 @@ def main():
             watches.append(base)
         elif (r["_cat"] == "9360" or r["_cat"].startswith("term:")) and (BAG.search(d) or LUGGAGE.search(d)) and price <= 600 and "REPLICA" not in d.upper():
             bags.append(dict(base, kind="luggage") if re.search(r"luggage|suitcase", name + " " + d, re.I) else base)
-        elif r["_cat"] == "2000" and TOOL.search(d) and price <= TOOL_MAX:
-            tools.append(base)
+        elif r["_cat"] == "2000" and (TOOL.search(d) or SCANNER.search(d) or POWER.search(name + " " + d)) and 40 <= price <= TOOL_MAX \
+                and not re.search(r"mower|trimmer|edger|blower|tiller", name, re.I):
+            tools.append(dict(base, kind="power") if POWER.search(name + " " + d) else dict(base, kind="scanner") if SCANNER.search(d) else base)
         elif r["_cat"] in ("9700", "6000", "5000") and OTHER.search(d + " " + name) and 40 <= price <= 600:
             other.append(base)
         elif r["_cat"] == "7500" and KNIFE.search(d) and 40 <= price <= 600:
             other.append(dict(base, kind="knife"))
+        elif r["_cat"] == "7500" and BOW.search(d) and re.search(r"bow", name, re.I) and 100 <= price <= 1000:
+            other.append(dict(base, kind="bow"))
+        elif r["_cat"] == "6000" and AUDIO.search(d) and 60 <= price <= 1500:
+            other.append(dict(base, kind="audio"))
         elif r["_cat"] == "4000" and re.search(r"rifle|shotgun|pistol|revolver|handgun", name, re.I) and GUN.search(d) and price <= 5000:
             guns.append(base)
         elif r["_cat"] == "4000" and not re.search(r"rifle|shotgun|pistol|revolver|handgun", name, re.I) \
@@ -191,9 +214,10 @@ def main():
             gear.append(dict(base, kind="suppressor") if SUPP.search(name + " " + d) else base)
 
     gold.sort(key=lambda x: x["ratio"])
+    silver.sort(key=lambda x: x["ratio"])
     for lst in (branded, watches, bags, tools, other, guns, gear):
         lst.sort(key=lambda x: x["price"])
-    cands = {"gold_below_melt": gold, "branded_jewelry": branded, "watches": watches, "bags": bags, "tools": tools, "other": other,
+    cands = {"gold_below_melt": gold, "silver_below_melt": silver, "branded_jewelry": branded, "watches": watches, "bags": bags, "tools": tools, "other": other,
              "firearms": guns, "gun_gear": gear}
     stats = {"EZPawn items scanned": len(ez), "Cash America items in range": ca_total, "Cash America items checked": len(ca),
              "Gold pieces priced vs. melt": gold_checked, "Gold listed below melt": sum(1 for g in gold if g["ratio"] < 1.0),
