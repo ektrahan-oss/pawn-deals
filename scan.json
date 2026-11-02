@@ -1,47 +1,47 @@
 [
  {
   "metric": "EZPawn items scanned",
-  "value": 65782,
-  "note": ""
+  "value": 65787,
+  "note": "Whole online catalog, all Houston-area stores"
  },
  {
   "metric": "Cash America items in range",
-  "value": 101141,
-  "note": ""
+  "value": 101360,
+  "note": "Within about 100 miles of downtown"
  },
  {
   "metric": "Cash America items checked",
-  "value": 69537,
-  "note": ""
+  "value": 69717,
+  "note": "Categories that matter for flips"
  },
  {
   "metric": "Gold pieces priced vs. melt",
-  "value": 25348,
-  "note": ""
+  "value": 25408,
+  "note": "Weights read from listings"
  },
  {
   "metric": "Gold listed below melt",
-  "value": 69,
-  "note": ""
+  "value": 70,
+  "note": "Before profit and budget filters"
  },
  {
   "metric": "Deals flagged",
-  "value": 19,
-  "note": ""
+  "value": 16,
+  "note": "After profit and budget filters"
  },
  {
   "metric": "Gold price used ($/oz)",
-  "value": 3875.36,
-  "note": ""
+  "value": 3900.92,
+  "note": "metalcharts.org spot"
  },
  {
   "metric": "Silver price used ($/oz)",
-  "value": 49.12,
-  "note": ""
+  "value": 50.24,
+  "note": "metalcharts.org spot"
  },
  {
   "metric": "Updated",
-  "value": "Updated Sun 5:27 am",
+  "value": "Updated Mon 5:29 am",
   "note": "Last scan time, Houston time"
  }
 ]
