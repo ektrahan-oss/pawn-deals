@@ -1,47 +1,47 @@
 [
  {
   "metric": "EZPawn items scanned",
-  "value": 67593,
-  "note": ""
+  "value": 40046,
+  "note": "Partial scan: some EZPawn stores did not respond today"
  },
  {
   "metric": "Cash America items in range",
-  "value": 102252,
+  "value": 101969,
   "note": ""
  },
  {
   "metric": "Cash America items checked",
-  "value": 70331,
+  "value": 70316,
   "note": ""
  },
  {
   "metric": "Gold pieces priced vs. melt",
-  "value": 25530,
+  "value": 24527,
   "note": ""
  },
  {
   "metric": "Gold listed below melt",
-  "value": 64,
+  "value": 61,
   "note": ""
  },
  {
   "metric": "Deals flagged",
-  "value": 79,
+  "value": 77,
   "note": ""
  },
  {
   "metric": "Gold price used ($/oz)",
-  "value": 3588.35,
+  "value": 3532.81,
   "note": "metalcharts.org spot"
  },
  {
   "metric": "Silver price used ($/oz)",
-  "value": 42.68,
+  "value": 41.01,
   "note": "metalcharts.org spot"
  },
  {
   "metric": "Updated",
-  "value": "Updated Fri 5:22 am",
+  "value": "Updated Sat 5:27 am",
   "note": "Last scan time, Houston time"
  }
 ]
