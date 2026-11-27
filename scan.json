@@ -11,7 +11,7 @@
  },
  {
   "metric": "Cash America items checked",
-  "value": 70608,
+  "value": 70585,
   "note": ""
  },
  {
@@ -21,27 +21,27 @@
  },
  {
   "metric": "Gold listed below melt",
-  "value": 62,
+  "value": 67,
   "note": ""
  },
  {
   "metric": "Deals flagged",
-  "value": 75,
+  "value": 73,
   "note": ""
  },
  {
   "metric": "Gold price used ($/oz)",
-  "value": 3565.57,
+  "value": 3677.01,
   "note": "metalcharts.org spot"
  },
  {
   "metric": "Silver price used ($/oz)",
-  "value": 41.49,
+  "value": 44.32,
   "note": "metalcharts.org spot"
  },
  {
   "metric": "Updated",
-  "value": "Updated Thu 5:22 am",
+  "value": "Updated Fri 5:22 am",
   "note": "Last scan time, Houston time"
  }
 ]
